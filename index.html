@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#8f1427">
+  <title>Secret Santa Family</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    :root{--red:#8f1427;--red2:#b6253d;--green:#153f32;--cream:#fffaf0;--gold:#d8aa4b;--ink:#2d2727;--muted:#756e6e;--card:rgba(255,255,255,.94);--shadow:0 14px 40px rgba(70,20,25,.14)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-rounded,"SF Pro Rounded",system-ui,-apple-system,sans-serif;color:var(--ink);min-height:100vh;background:radial-gradient(circle at 10% 0%,#ffe2d1 0,transparent 27%),radial-gradient(circle at 90% 10%,#e1efe1 0,transparent 30%),linear-gradient(160deg,#fffaf0,#f8eee5);padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+    body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:radial-gradient(#fff 1.5px,transparent 1.5px);background-size:24px 24px}
+    .app{width:min(680px,100%);margin:auto;padding:20px 16px 110px;position:relative}.hero{text-align:center;padding:24px 8px 16px}.badge{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid #f0dfca;border-radius:999px;padding:7px 12px;font-size:12px;font-weight:800;color:var(--red);box-shadow:0 6px 18px rgba(80,30,30,.08)}h1{font-size:clamp(32px,9vw,52px);line-height:.98;margin:14px 0 10px;color:var(--red);letter-spacing:-1.5px}.subtitle{margin:0;color:var(--muted);font-size:15px}.card{background:var(--card);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.8);border-radius:24px;padding:20px;box-shadow:var(--shadow);margin:14px 0}.card h2{font-size:20px;margin:0 0 6px}.card p{color:var(--muted);margin:0 0 16px;font-size:14px}.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.person{border:1px solid #eadfd4;background:#fff;border-radius:16px;padding:14px 10px;font-weight:800;color:var(--green);cursor:pointer;min-height:52px;transition:.2s}.person:active{transform:scale(.97)}.person.selected{background:var(--green);color:white;border-color:var(--green);box-shadow:0 8px 20px rgba(21,63,50,.22)}button{font:inherit}.primary,.secondary,.danger{width:100%;border:0;border-radius:16px;padding:15px 16px;font-weight:850;cursor:pointer}.primary{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;box-shadow:0 9px 22px rgba(143,20,39,.25)}.secondary{background:#edf4ef;color:var(--green)}.danger{background:#fff0f0;color:#a32136}.primary:disabled{opacity:.5}.hidden{display:none!important}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:800;margin:0 0 7px}.field input,.field textarea,.field select{width:100%;border:1px solid #ded4ca;border-radius:14px;padding:13px 14px;background:#fff;color:var(--ink);font:inherit;outline:none}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(216,170,75,.18)}textarea{min-height:88px;resize:vertical}.wish{padding:15px 0;border-bottom:1px solid #eee4db}.wish:last-child{border-bottom:0}.wish-top{display:flex;justify-content:space-between;gap:12px}.wish-title{font-weight:850}.wish-note{color:var(--muted);font-size:13px;margin-top:5px;white-space:pre-line}.wish-link{display:inline-block;margin-top:7px;color:var(--red);font-size:13px;font-weight:800;text-decoration:none}.actions{display:flex;gap:7px;margin-top:10px}.mini{border:0;border-radius:10px;padding:8px 11px;font-size:12px;font-weight:800;cursor:pointer}.edit{background:#edf4ef;color:var(--green)}.delete{background:#fff0f0;color:#a32136}.family-tabs{display:flex;gap:8px;overflow:auto;padding:2px 0 10px;scrollbar-width:none}.family-tabs::-webkit-scrollbar{display:none}.tab{flex:0 0 auto;border:1px solid #eadfd4;background:#fff;border-radius:999px;padding:9px 13px;font-weight:800;color:var(--green);cursor:pointer}.tab.active{background:var(--red);border-color:var(--red);color:#fff}.empty{text-align:center;padding:24px 8px;color:var(--muted)}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#24352f;color:white;padding:12px 16px;border-radius:13px;font-weight:700;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:10;max-width:calc(100% - 32px);text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}.loading{display:inline-block;width:16px;height:16px;border:2px solid #ddd;border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.footer{text-align:center;color:#8c817b;font-size:12px;margin-top:24px}@media(min-width:600px){.grid{grid-template-columns:repeat(3,1fr)}.app{padding-top:34px}.card{padding:24px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="hero"><span class="badge">✨ LA NOSTRA FAMIGLIA</span><h1>Secret Santa<br>2026 🎄</h1><p class="subtitle">Un piccolo aiuto per trovare il regalo giusto.</p></header>
+
+    <section class="card" id="identityCard">
+      <h2>Chi sei?</h2><p>Scegli il tuo nome per aggiungere o modificare i tuoi desideri.</p>
+      <div id="peopleGrid" class="grid"><div class="loading"></div></div>
+      <button id="continueBtn" class="primary" style="margin-top:16px" disabled>Continua</button>
+    </section>
+
+    <section id="myArea" class="hidden">
+      <div class="card">
+        <h2 id="helloTitle">La mia wishlist 🎁</h2><p>Aggiungi idee, link e indicazioni utili per il tuo Secret Santa.</p>
+        <button id="newWishBtn" class="primary">＋ Aggiungi un desiderio</button>
+      </div>
+      <div class="card"><h2>I miei desideri</h2><div id="myWishes"></div></div>
+    </section>
+
+    <section id="formCard" class="card hidden">
+      <h2 id="formTitle">Nuovo desiderio</h2>
+      <form id="wishForm">
+        <div class="field"><label for="wishTitle">Cosa ti piacerebbe ricevere? *</label><input id="wishTitle" maxlength="120" required placeholder="Es. Un libro, una sciarpa, un'esperienza..."></div>
+        <div class="field"><label for="wishLink">Link facoltativo</label><input id="wishLink" type="url" maxlength="500" placeholder="https://..."></div>
+        <div class="field"><label for="wishNote">Nota facoltativa</label><textarea id="wishNote" maxlength="500" placeholder="Taglia, colore, modello o qualsiasi indicazione utile"></textarea></div>
+        <div class="field"><label for="wishPriority">Quanto ti piacerebbe?</label><select id="wishPriority"><option value="1">Mi farebbe piacere</option><option value="2">Mi piacerebbe molto</option><option value="3">È tra i miei preferiti ⭐</option></select></div>
+        <button class="primary" type="submit">Salva desiderio 🎁</button><button class="secondary" type="button" id="cancelBtn" style="margin-top:9px">Annulla</button>
+      </form>
+    </section>
+
+    <section class="card" id="familyCard"><h2>Wishlist della famiglia 🎄</h2><p>Scegli una persona per vedere le sue idee regalo.</p><div id="familyTabs" class="family-tabs"></div><div id="familyWishes"></div></section>
+    <div class="footer">Fatto con ❤️ per la famiglia</div>
+  </main>
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const SUPABASE_URL = 'https://oaklgqzuppnuywillxxl.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_ZBJICaM_RsOL7bR6RL5_vA_5Iu44gXi';
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    let participants=[], selectedPerson=null, familyPerson=null, editingId=null;
+    const $=id=>document.getElementById(id);
+
+    function toast(message){const t=$('toast');t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+    function safeUrl(value){try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)?u.href:null}catch{return null}}
+    function escapeHtml(s=''){return String(s).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
+    const stars=p=>p==3?'⭐ Preferito':p==2?'✨ Mi piacerebbe molto':'';
+
+    async function init(){
+      const {data,error}=await db.from('participants').select('id,name').order('id');
+      if(error){$('peopleGrid').innerHTML='<div>Errore di collegamento.</div>';toast(error.message);return}
+      participants=data||[]; renderPeople(); renderTabs();
+      if(participants.length){familyPerson=participants[0];loadFamilyWishes()}
+    }
+    function renderPeople(){
+      $('peopleGrid').innerHTML=participants.map(p=>`<button class="person" data-id="${p.id}">${escapeHtml(p.name)}</button>`).join('');
+      document.querySelectorAll('.person').forEach(b=>b.onclick=()=>{selectedPerson=participants.find(p=>p.id==b.dataset.id);document.querySelectorAll('.person').forEach(x=>x.classList.toggle('selected',x===b));$('continueBtn').disabled=false});
+    }
+    function renderTabs(){
+      $('familyTabs').innerHTML=participants.map(p=>`<button class="tab" data-id="${p.id}">${escapeHtml(p.name)}</button>`).join('');
+      document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{familyPerson=participants.find(p=>p.id==b.dataset.id);loadFamilyWishes()});
+    }
+    $('continueBtn').onclick=()=>{$('myArea').classList.remove('hidden');$('helloTitle').textContent=`Ciao ${selectedPerson.name}, la tua wishlist 🎁`;$('myArea').scrollIntoView({behavior:'smooth'});loadMyWishes()};
+    $('newWishBtn').onclick=()=>openForm();$('cancelBtn').onclick=closeForm;
+    function openForm(w=null){editingId=w?.id||null;$('formTitle').textContent=w?'Modifica desiderio':'Nuovo desiderio';$('wishTitle').value=w?.title||'';$('wishLink').value=w?.link||'';$('wishNote').value=w?.note||'';$('wishPriority').value=w?.priority||1;$('formCard').classList.remove('hidden');$('formCard').scrollIntoView({behavior:'smooth'})}
+    function closeForm(){$('formCard').classList.add('hidden');$('wishForm').reset();editingId=null}
+    $('wishForm').onsubmit=async e=>{
+      e.preventDefault(); if(!selectedPerson)return;
+      const payload={participant_id:selectedPerson.id,title:$('wishTitle').value.trim(),link:$('wishLink').value.trim()||null,note:$('wishNote').value.trim()||null,priority:Number($('wishPriority').value)};
+      if(payload.link&&!safeUrl(payload.link)){toast('Inserisci un link valido che inizi con http:// o https://');return}
+      const result=editingId?await db.from('wishes').update(payload).eq('id',editingId).eq('participant_id',selectedPerson.id):await db.from('wishes').insert(payload);
+      if(result.error){toast('Errore: '+result.error.message);return} closeForm();toast(editingId?'Desiderio aggiornato':'Desiderio salvato 🎄');await loadMyWishes();if(familyPerson?.id===selectedPerson.id)loadFamilyWishes();
+    };
+    async function getWishes(personId){return await db.from('wishes').select('*').eq('participant_id',personId).order('priority',{ascending:false}).order('created_at',{ascending:false})}
+    function wishHtml(w,editable=false){const link=w.link&&safeUrl(w.link);return `<article class="wish"><div class="wish-top"><div class="wish-title">${escapeHtml(w.title)}</div><small>${stars(w.priority)}</small></div>${w.note?`<div class="wish-note">${escapeHtml(w.note)}</div>`:''}${link?`<a class="wish-link" href="${escapeHtml(link)}" target="_blank" rel="noopener noreferrer">Apri il link ↗</a>`:''}${editable?`<div class="actions"><button class="mini edit" data-edit="${w.id}">Modifica</button><button class="mini delete" data-delete="${w.id}">Elimina</button></div>`:''}</article>`}
+    async function loadMyWishes(){const {data,error}=await getWishes(selectedPerson.id);if(error){toast(error.message);return}$('myWishes').innerHTML=data.length?data.map(w=>wishHtml(w,true)).join(''):'<div class="empty">Non hai ancora aggiunto desideri.</div>';document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openForm(data.find(w=>w.id==b.dataset.edit)));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteWish(Number(b.dataset.delete)))}
+    async function deleteWish(id){if(!confirm('Vuoi eliminare questo desiderio?'))return;const {error}=await db.from('wishes').delete().eq('id',id).eq('participant_id',selectedPerson.id);if(error){toast(error.message);return}toast('Desiderio eliminato');loadMyWishes();if(familyPerson?.id===selectedPerson.id)loadFamilyWishes()}
+    async function loadFamilyWishes(){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',Number(b.dataset.id)===familyPerson.id));$('familyWishes').innerHTML='<div class="empty"><span class="loading"></span></div>';const {data,error}=await getWishes(familyPerson.id);if(error){toast(error.message);return}$('familyWishes').innerHTML=data.length?data.map(w=>wishHtml(w)).join(''):`<div class="empty">${escapeHtml(familyPerson.name)} non ha ancora aggiunto desideri.</div>`}
+    init();
+  </script>
+</body>
+</html>
